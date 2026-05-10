@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Venta | ERP Ventas{% endblock %}
+{% block content %}
+<div class="panel-card p-4 text-center">
+    <h3 class="mb-3">Eliminar venta</h3>
+    <p class="text-secondary">¿Deseas eliminar la venta #{{ object.id }}?</p>
+    <form method="post">{% csrf_token %}
+        <a class="btn btn-outline-secondary" href="{% url 'ventas:venta_list' %}">Cancelar</a>
+        <button class="btn btn-danger">Eliminar</button>
+    </form>
+</div>
+{% endblock %}

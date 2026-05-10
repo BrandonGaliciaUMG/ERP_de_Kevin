@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Acceso por rol desactivado | ERP Ventas{% endblock %}
+{% block content %}
+<div class="row justify-content-center" style="min-height:60vh;">
+    <div class="col-lg-6">
+        <div class="panel-card p-4 p-lg-5 text-center">
+            <span class="badge badge-soft rounded-pill px-3 py-2 mb-3 d-inline-flex align-items-center gap-2"><i class="bi bi-shield-lock"></i><span>Acceso deshabilitado</span></span>
+            <h2 class="mb-3">Login por rol desactivado</h2>
+            <p class="text-secondary mb-4">Ahora el acceso se realiza con el login normal de cada usuario.</p>
+            <a href="{% url 'usuarios:login' %}" class="btn btn-brand btn-lg d-inline-flex align-items-center gap-2"><i class="bi bi-box-arrow-in-right"></i><span>Ir al login normal</span></a>
+            <p class="text-muted mt-3 small mb-0">Si necesitas el listado de usuarios y contraseñas, te lo dejo a continuación.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

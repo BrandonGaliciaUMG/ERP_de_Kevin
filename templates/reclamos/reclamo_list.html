@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Reclamos | ERP Ventas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h1 class="h3 d-inline-flex align-items-center gap-2"><i class="bi bi-chat-dots text-primary"></i><span>Reclamos</span></h1>
+        <p class="text-secondary">Listado de reclamos</p>
+    </div>
+    <div>
+        <a href="{% url 'reclamos:reclamo_create' %}" class="btn btn-brand d-inline-flex align-items-center gap-2"><i class="bi bi-plus-circle"></i><span>Nuevo Reclamo</span></a>
+    </div>
+</div>
+<div class="panel-card p-3">
+    <table class="table">
+        <thead><tr><th><i class="bi bi-hash me-1"></i>ID</th><th><i class="bi bi-person me-1"></i>Cliente</th><th><i class="bi bi-receipt me-1"></i>Pedido</th><th><i class="bi bi-flag me-1"></i>Estado</th><th class="text-end">Acciones</th></tr></thead>
+        <tbody>
+            {% for r in reclamos %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.cliente.nombre }}</td>
+                <td>{% if r.pedido %}{{ r.pedido.id }}{% else %}-{% endif %}</td>
+                <td><span class="badge text-bg-light border">{{ r.get_estado_display }}</span></td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-dark d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_detail' r.pk %}"><i class="bi bi-eye"></i><span>Ver</span></a>
+                    <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_update' r.pk %}"><i class="bi bi-pencil-square"></i><span>Editar</span></a>
+                    <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_delete' r.pk %}"><i class="bi bi-trash"></i><span>Eliminar</span></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-secondary py-4">No hay reclamos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

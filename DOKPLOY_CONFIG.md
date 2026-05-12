@@ -26,21 +26,21 @@ Crear en Dokploy → Project → Web Service → Environment Variables:
 
 ```
 # === SEGURIDAD ===
-SECRET_KEY=django-insecure-tu-clave-aleatoria-aqui  # USAR COMANDO ABAJO
+SECRET_KEY=django-insecure-4z@9m_3rvq8!@t#2x$%^&*(z9k_l+p0q=r@!$%^&*()_+-
 DEBUG=False
-ALLOWED_HOSTS=tu-dominio.com,www.tu-dominio.com
+ALLOWED_HOSTS=erp.witzbe.tech,www.erp.witzbe.tech
 
 # === BASE DE DATOS ===
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=erp_ventas_prod
 DB_USER=erp_user
-DB_PASSWORD=tu-contrasena-fuerte-aqui
+DB_PASSWORD=PruebaErp2024!Witzbe123
 DB_HOST=postgres-service  # Nombre del servicio en Dokploy
 DB_PORT=5432
 DB_WAIT_TIMEOUT=300
 
 # === SSL / HTTPS ===
-CSRF_TRUSTED_ORIGINS=https://tu-dominio.com,https://www.tu-dominio.com
+CSRF_TRUSTED_ORIGINS=https://erp.witzbe.tech,https://www.erp.witzbe.tech
 SECURE_PROXY_SSL_HEADER=True
 SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
@@ -109,14 +109,14 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 Dashboard → Project: ERP de Kevin → Web Service → Domains
 + Add Domain
 
-Domain Name: tu-dominio.com
+Domain Name: erp.witzbe.tech
 Protocol: HTTPS (Auto SSL)
 ```
 
 ### 2. Subdominios (Opcional)
 ```
 + Add Domain
-Domain Name: www.tu-dominio.com
+Domain Name: www.erp.witzbe.tech
 + Add Domain
 Domain Name: api.tu-dominio.com
 ```
@@ -124,8 +124,8 @@ Domain Name: api.tu-dominio.com
 ### 3. DNS
 Apuntar en tu proveedor de DNS:
 ```
-A Record: tu-dominio.com → IP-DE-TU-SERVIDOR-DOKPLOY
-A Record: www.tu-dominio.com → IP-DE-TU-SERVIDOR-DOKPLOY
+A Record: erp.witzbe.tech → IP-DE-TU-SERVIDOR-DOKPLOY
+A Record: www.erp.witzbe.tech → IP-DE-TU-SERVIDOR-DOKPLOY
 ```
 
 ---

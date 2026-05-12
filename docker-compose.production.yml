@@ -75,19 +75,19 @@ services:
       # === SEGURIDAD ===
       SECRET_KEY: ${SECRET_KEY:-django-insecure-change-this-in-production}
       DEBUG: ${DEBUG:-False}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-erp.witzbe.tech,www.erp.witzbe.tech}
       
       # === BASE DE DATOS ===
       DB_ENGINE: django.db.backends.postgresql
       DB_NAME: ${POSTGRES_DB:-erp_ventas_prod}
       DB_USER: ${POSTGRES_USER:-erp_user}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-PruebaErp2024!Witzbe123}
       DB_HOST: db  # Nombre del servicio
       DB_PORT: 5432
       DB_WAIT_TIMEOUT: ${DB_WAIT_TIMEOUT:-300}
       
       # === SEGURIDAD HTTPS ===
-      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://erp.witzbe.tech,https://www.erp.witzbe.tech}
       SECURE_PROXY_SSL_HEADER: ${SECURE_PROXY_SSL_HEADER:-True}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
       CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-True}
@@ -101,7 +101,7 @@ services:
       RUN_COLLECTSTATIC: ${RUN_COLLECTSTATIC:-True}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-True}
       RUN_SEED: ${RUN_SEED:-False}  # NUNCA True en producción
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-AdminTest2024!Erp}
       
       # === TIMEZONE ===
       TZ: America/Bogota

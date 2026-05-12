@@ -34,6 +34,8 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - staticfiles_data:/app/staticfiles
+      - media_data:/app/media
     ports:
       - "${WEB_PORT:-8000}:8000"
     environment:
@@ -78,6 +80,8 @@ services:
 
 volumes:
   postgres_data:
+  staticfiles_data:
+  media_data:
 
 networks:
   erp_network:

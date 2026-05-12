@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN chmod +x /app/docker/entrypoint.sh \
     && useradd -m -u 1000 django_user \
+    && mkdir -p /app/staticfiles /app/media \
     && chown -R django_user:django_user /app
 
 USER django_user

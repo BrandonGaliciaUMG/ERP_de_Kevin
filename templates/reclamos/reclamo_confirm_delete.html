@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Cerrar Reclamo | ERP Ventas{% endblock %}
+{% block content %}
+<div class="panel-card p-4 text-center">
+    <h3 class="mb-3">Cerrar reclamo</h3>
+    <p class="text-secondary">¿Deseas cerrar el reclamo #{{ object.id }}? El historial permanecerá disponible.</p>
+    <form method="post">{% csrf_token %}
+        <a class="btn btn-outline-secondary" href="{% url 'reclamos:reclamo_list' %}">Volver</a>
+        <button class="btn btn-danger">Cerrar reclamo</button>
+    </form>
+</div>
+{% endblock %}

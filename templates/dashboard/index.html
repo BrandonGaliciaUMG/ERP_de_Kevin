@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | ERP Ventas{% endblock %}
+{% block content %}
+<div class="panel-card executive-hero p-4 p-lg-5 mb-4 position-relative overflow-hidden">
+    <div class="row align-items-center g-4 position-relative">
+        <div class="col-lg-8">
+            <span class="badge badge-soft rounded-pill px-3 py-2 mb-3"><i class="bi bi-building me-1"></i>Centro de control ERP</span>
+            <h1 class="display-6 fw-bold mb-3">Operación comercial centralizada</h1>
+            <p class="lead mb-0">Monitorea ventas, pedidos, inventario y reclamos desde una vista ejecutiva clara y confiable.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a class="btn btn-light btn-lg px-4 d-inline-flex align-items-center gap-2" href="{% url 'clientes:cliente_create' %}"><i class="bi bi-person-plus"></i><span>Nuevo cliente</span></a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Clientes</div>
+                    <div class="metric-value fw-bold">{{ totales.clientes }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis"><i class="bi bi-people"></i></span>
+            </div>
+            <div class="small text-secondary">Base comercial activa</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Productos</div>
+                    <div class="metric-value fw-bold">{{ totales.productos }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-success-subtle text-success-emphasis"><i class="bi bi-box-seam"></i></span>
+            </div>
+            <div class="small text-secondary">Catálogo disponible</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Pedidos</div>
+                    <div class="metric-value fw-bold">{{ totales.pedidos }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis"><i class="bi bi-receipt"></i></span>
+            </div>
+            <div class="small text-secondary">Flujo operativo</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Ventas</div>
+                    <div class="metric-value fw-bold">{{ totales.ventas }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-info-subtle text-info-emphasis"><i class="bi bi-cash-coin"></i></span>
+            </div>
+            <div class="small text-secondary">Movimientos registrados</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Reclamos</div>
+                    <div class="metric-value fw-bold">{{ totales.reclamos }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-danger-subtle text-danger-emphasis"><i class="bi bi-chat-dots"></i></span>
+            </div>
+            <div class="small text-secondary">Casos abiertos / cerrados</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="panel-card metric-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <div class="text-secondary small text-uppercase fw-semibold">Stock bajo</div>
+                    <div class="metric-value fw-bold">{{ totales.stock_bajo }}</div>
+                </div>
+                <span class="badge rounded-pill text-bg-dark"><i class="bi bi-exclamation-triangle"></i></span>
+            </div>
+            <div class="small text-secondary">Alertas de reabastecimiento</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel-card p-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h4 mb-0">Resumen operativo</h2>
+        <span class="badge text-bg-light text-dark border"><i class="bi bi-graph-up me-1"></i>Vista ejecutiva</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="info-tile p-3 border d-flex align-items-center gap-3"><i class="bi bi-hourglass-split fs-4 text-primary"></i><div>Pedidos pendientes <strong class="d-block">{{ pedidos_pendientes }}</strong></div></div></div>
+        <div class="col-md-4"><div class="info-tile p-3 border d-flex align-items-center gap-3"><i class="bi bi-check2-circle fs-4 text-success"></i><div>Pedidos entregados <strong class="d-block">{{ pedidos_entregados }}</strong></div></div></div>
+        <div class="col-md-4"><div class="info-tile p-3 border d-flex align-items-center gap-3"><i class="bi bi-bell fs-4 text-danger"></i><div>Reclamos abiertos <strong class="d-block">{{ reclamos_abiertos }}</strong></div></div></div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-xl-8">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-bar-chart-line text-primary"></i><span>Ventas por mes</span></h3>
+                <span class="badge text-bg-light border">Ingresos</span>
+            </div>
+            <div class="chart-frame">
+                <canvas id="ventasMesChart" aria-label="Ventas por mes" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-cash-stack text-primary"></i><span>Ventas por estado</span></h3>
+                <span class="badge text-bg-light border">{{ totales.ventas }}</span>
+            </div>
+            <div class="chart-frame">
+                <canvas id="ventasEstadoChart" aria-label="Ventas por estado" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-receipt text-primary"></i><span>Pedidos por estado</span></h3>
+                <span class="badge text-bg-light border">{{ totales.pedidos }}</span>
+            </div>
+            <div class="chart-frame-sm">
+                <canvas id="pedidosEstadoChart" aria-label="Pedidos por estado" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-chat-dots text-primary"></i><span>Reclamos por estado</span></h3>
+                <span class="badge text-bg-light border">{{ totales.reclamos }}</span>
+            </div>
+            <div class="chart-frame-sm">
+                <canvas id="reclamosEstadoChart" aria-label="Reclamos por estado" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-boxes text-primary"></i><span>Stock principal</span></h3>
+                <span class="badge text-bg-light border">{{ totales.productos }}</span>
+            </div>
+            <div class="chart-frame-sm">
+                <canvas id="stockProductosChart" aria-label="Stock principal" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-receipt text-primary"></i><span>Últimos pedidos</span></h3>
+                <span class="badge text-bg-light border">{{ ultimos_pedidos|length }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for pedido in ultimos_pedidos %}
+                    <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="fw-semibold">Pedido #{{ pedido.id }}</div>
+                            <div class="text-secondary small d-inline-flex align-items-center gap-2 flex-wrap">
+                                <span><i class="bi bi-person me-1"></i>{{ pedido.cliente.nombre }}</span>
+                                <span>·</span>
+                                <span>{{ pedido.fecha_pedido|date:'d/m/Y H:i' }}</span>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-light border">{{ pedido.get_estado_display }}</span>
+                    </div>
+                {% empty %}
+                    <div class="text-secondary">No hay pedidos recientes.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-cash-coin text-primary"></i><span>Últimas ventas</span></h3>
+                <span class="badge text-bg-light border">{{ ultimas_ventas|length }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for venta in ultimas_ventas %}
+                    <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="fw-semibold">Venta #{{ venta.id }}</div>
+                            <div class="text-secondary small d-inline-flex align-items-center gap-2 flex-wrap">
+                                <span><i class="bi bi-receipt me-1"></i>Pedido {{ venta.pedido.id }}</span>
+                                <span>·</span>
+                                <span>{{ venta.fecha_venta|date:'d/m/Y H:i' }}</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold">${{ venta.total }}</div>
+                            <span class="badge text-bg-light border">{{ venta.get_estado_display }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-secondary">No hay ventas recientes.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel-card p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle text-primary"></i><span>Alertas de stock</span></h3>
+                <span class="badge text-bg-light border">{{ alertas_stock|length }}</span>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for producto in alertas_stock %}
+                    <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="fw-semibold">{{ producto.nombre }}</div>
+                            <div class="text-secondary small">Stock mínimo: {{ producto.stock_minimo }}</div>
+                        </div>
+                        <span class="badge text-bg-danger-subtle text-danger-emphasis">{{ producto.stock }}</span>
+                    </div>
+                {% empty %}
+                    <div class="text-secondary">No hay alertas de inventario.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="panel-card p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-chat-dots text-primary"></i><span>Últimos reclamos</span></h3>
+                <span class="badge text-bg-light border">{{ ultimos_reclamos|length }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Pedido</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Resumen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reclamo in ultimos_reclamos %}
+                        <tr>
+                            <td class="fw-semibold">{{ reclamo.cliente.nombre }}</td>
+                            <td>{% if reclamo.pedido %}#{{ reclamo.pedido.id }}{% else %}-{% endif %}</td>
+                            <td><span class="badge text-bg-light border">{{ reclamo.get_estado_display }}</span></td>
+                            <td>{{ reclamo.fecha_creacion|date:'d/m/Y H:i' }}</td>
+                            <td class="text-secondary">{{ reclamo.descripcion|truncatechars:60 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-secondary py-4">No hay reclamos recientes.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{ dashboard_charts|json_script:"dashboard-charts-data" }}
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+    (() => {
+        const chartData = JSON.parse(document.getElementById('dashboard-charts-data').textContent);
+        const palette = {
+            petrol: '#173f43',
+            petrolSoft: '#5f8585',
+            sage: '#7d947b',
+            sageStrong: '#55705b',
+            gold: '#b58a3b',
+            terracotta: '#b46a4c',
+            clay: '#8f5f4b'
+        };
+        const gridColor = 'rgba(122, 112, 100, 0.18)';
+        const textColor = '#51483d';
+
+        const baseOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        color: textColor,
+                        font: { family: 'Inter' }
+                    }
+                }
+            }
+        };
+
+        const formatCurrency = (value) => new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            maximumFractionDigits: 0
+        }).format(value);
+
+        const makeDoughnut = (id, data, colors) => {
+            new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.values,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    ...baseOptions,
+                    cutout: '62%',
+                    plugins: {
+                        ...baseOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.label}: ${context.parsed}`
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        new Chart(document.getElementById('ventasMesChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.ventas_mes.labels,
+                datasets: [{
+                    label: 'Ventas',
+                    data: chartData.ventas_mes.values,
+                    backgroundColor: 'rgba(23, 63, 67, 0.82)',
+                    borderColor: palette.petrol,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    maxBarThickness: 48
+                }]
+            },
+            options: {
+                ...baseOptions,
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: textColor, font: { family: 'Inter' } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: {
+                            color: textColor,
+                            font: { family: 'Inter' },
+                            callback: (value) => formatCurrency(value)
+                        }
+                    }
+                },
+                plugins: {
+                    ...baseOptions.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => formatCurrency(context.parsed.y)
+                        }
+                    }
+                }
+            }
+        });
+
+        makeDoughnut('ventasEstadoChart', chartData.ventas_estado, [palette.gold, palette.sageStrong, palette.terracotta]);
+        makeDoughnut('pedidosEstadoChart', chartData.pedidos_estado, [palette.gold, palette.petrolSoft, palette.sageStrong, palette.terracotta]);
+        makeDoughnut('reclamosEstadoChart', chartData.reclamos_estado, [palette.terracotta, palette.gold, palette.sageStrong, palette.clay]);
+
+        new Chart(document.getElementById('stockProductosChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.stock_productos.labels,
+                datasets: [{
+                    label: 'Stock',
+                    data: chartData.stock_productos.values,
+                    backgroundColor: 'rgba(125, 148, 123, 0.78)',
+                    borderColor: palette.sageStrong,
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                ...baseOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { precision: 0, color: textColor, font: { family: 'Inter' } }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: textColor, font: { family: 'Inter' } }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{% endblock %}

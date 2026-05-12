@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Detalle Pedido | ERP Ventas{% endblock %}
+{% block content %}
+<div class="panel-card p-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-4 flex-wrap">
+        <div>
+            <span class="badge badge-soft rounded-pill px-3 py-2 mb-2 d-inline-flex align-items-center gap-2"><i class="bi bi-receipt"></i><span>Detalle de Pedido</span></span>
+            <h2 class="h4 mb-1 d-inline-flex align-items-center gap-2"><i class="bi bi-cart-check text-primary"></i><span>Pedido {{ pedido.id }}</span></h2>
+            <p class="text-muted mb-0 d-inline-flex align-items-center gap-2"><i class="bi bi-person"></i><span>Cliente: {{ pedido.cliente.nombre }}</span></p>
+        </div>
+        <div class="text-end d-flex gap-2 flex-wrap">
+            <a class="btn btn-brand d-inline-flex align-items-center gap-2" href="{% url 'pedidos:pedido_update' pedido.pk %}"><i class="bi bi-pencil-square"></i><span>Editar</span></a>
+            <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" href="{% url 'pedidos:pedido_list' %}"><i class="bi bi-arrow-left"></i><span>Volver</span></a>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="p-3 border rounded-4 bg-light d-flex align-items-start gap-3"><i class="bi bi-calendar-event fs-4 text-primary"></i><div><small class="text-secondary d-block mb-1">Fecha pedido</small><strong>{{ pedido.fecha_pedido }}</strong></div></div></div>
+        <div class="col-md-4"><div class="p-3 border rounded-4 bg-light d-flex align-items-start gap-3"><i class="bi bi-flag fs-4 text-primary"></i><div><small class="text-secondary d-block mb-1">Estado</small><strong>{{ pedido.get_estado_display }}</strong></div></div></div>
+        <div class="col-md-4"><div class="p-3 border rounded-4 bg-light d-flex align-items-start gap-3"><i class="bi bi-currency-dollar fs-4 text-primary"></i><div><small class="text-secondary d-block mb-1">Total</small><strong>{{ pedido.total }}</strong></div></div></div>
+    </div>
+    <div class="mt-4">
+        <h3 class="h5 mb-3 d-inline-flex align-items-center gap-2"><i class="bi bi-box-seam text-primary"></i><span>Productos del pedido</span></h3>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in pedido.detalles.all %}
+                        <tr>
+                            <td class="fw-semibold">{{ detalle.producto.nombre }}</td>
+                            <td>{{ detalle.cantidad }}</td>
+                            <td>{{ detalle.precio_unitario }}</td>
+                            <td>{{ detalle.subtotal }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-center text-secondary py-4">Este pedido no tiene productos asociados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

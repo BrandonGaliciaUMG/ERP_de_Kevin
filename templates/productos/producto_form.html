@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Producto | ERP Ventas{% endblock %}
+{% block content %}
+<div class="panel-card p-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-3 flex-wrap">
+        <div>
+            <span class="badge badge-soft rounded-pill px-3 py-2 mb-2 d-inline-flex align-items-center gap-2"><i class="bi bi-box-seam"></i><span>Módulo de Productos</span></span>
+            <h2 class="h4 mb-1 d-inline-flex align-items-center gap-2"><i class="bi bi-box text-primary"></i><span>{% if form.instance.pk %}Editar Producto{% else %}Nuevo Producto{% endif %}</span></h2>
+            <p class="text-secondary mb-0">Define información comercial y control de inventario.</p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" href="{% url 'productos:producto_list' %}"><i class="bi bi-arrow-left"></i><span>Volver</span></a>
+        </div>
+    </div>
+    <form method="post">{% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.nombre.id_for_label }}"><i class="bi bi-tag"></i><span>{{ form.nombre.label }}</span></label>
+                {{ form.nombre }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.precio.id_for_label }}"><i class="bi bi-currency-dollar"></i><span>{{ form.precio.label }}</span></label>
+                {{ form.precio }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.stock.id_for_label }}"><i class="bi bi-boxes"></i><span>{{ form.stock.label }}</span></label>
+                {{ form.stock }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.stock_minimo.id_for_label }}"><i class="bi bi-exclamation-triangle"></i><span>{{ form.stock_minimo.label }}</span></label>
+                {{ form.stock_minimo }}
+            </div>
+            <div class="col-12">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.descripcion.id_for_label }}"><i class="bi bi-card-text"></i><span>{{ form.descripcion.label }}</span></label>
+                {{ form.descripcion }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.estado.id_for_label }}"><i class="bi bi-flag"></i><span>{{ form.estado.label }}</span></label>
+                {{ form.estado }}
+            </div>
+            <div class="col-12 text-end">
+                <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" href="{% url 'productos:producto_list' %}"><i class="bi bi-x-circle"></i><span>Cancelar</span></a>
+                <button class="btn btn-brand d-inline-flex align-items-center gap-2"><i class="bi bi-check2-circle"></i><span>Guardar</span></button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

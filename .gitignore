@@ -34,6 +34,7 @@ db.sqlite3
 *.swp
 *.swo
 *~
+*.log
 .coverage
 htmlcov/
 .pytest_cache/

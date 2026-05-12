@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.apps import apps
 from django.utils import timezone
+from datetime import timedelta
 import random
 
 
@@ -59,6 +60,76 @@ def fill_required_fields(model, pdata, context_instances=None):
         else:
             # generic fallback
             pdata[name] = None
+
+
+def weighted_choice(options):
+    return random.choices([value for value, _ in options], weights=[weight for _, weight in options], k=1)[0]
+
+
+def random_past_datetime(max_days_back):
+    now = timezone.now()
+    delta = timedelta(
+        days=random.randint(0, max_days_back),
+        hours=random.randint(0, 23),
+        minutes=random.randint(0, 59),
+        seconds=random.randint(0, 59),
+    )
+    return now - delta
+
+
+PRODUCT_NAMES = [
+    'Jabon',
+    'Queso',
+    'Soda',
+    'Arroz',
+    'Leche',
+    'Pan',
+    'Huevos',
+    'Cafe',
+    'Azucar',
+    'Sal',
+    'Aceite',
+    'Fideos',
+    'Atun',
+    'Galletas',
+    'Yogur',
+    'Harina',
+    'Mantequilla',
+    'Cereal',
+    'Té',
+    'Agua',
+    'Jugo de naranja',
+    'Lentejas',
+    'Frijoles',
+    'Avena',
+    'Papel higienico',
+    'Shampoo',
+    'Detergente',
+    'Tomate en lata',
+    'Mayonesa',
+    'Ketchup',
+    'Pasta dental',
+]
+
+VENTA_ESTADOS = [
+    ('pendiente', 3),
+    ('pagada', 5),
+    ('anulada', 2),
+]
+
+PEDIDO_ESTADOS = [
+    ('pendiente', 2),
+    ('en_proceso', 3),
+    ('entregado', 4),
+    ('cancelado', 2),
+]
+
+RECLAMO_ESTADOS = [
+    ('abierto', 2),
+    ('en_revision', 3),
+    ('resuelto', 3),
+    ('cerrado', 2),
+]
 
 
 class Command(BaseCommand):
@@ -174,15 +245,22 @@ class Command(BaseCommand):
                 stock_field = f
                 break
 
+        low_stock_count = min(n, max(2, min(4, (n // 8) + 1)))
+        low_stock_indices = set(range(low_stock_count))
+
         for i in range(n):
-            name = f'Producto {i+1}'
+            base_name = PRODUCT_NAMES[i] if i < len(PRODUCT_NAMES) else f'Producto {i + 1}'
+            name = base_name if i < len(PRODUCT_NAMES) else f'{base_name} {i + 1}'
             vals = {}
             if name_field:
                 vals[name_field] = name
             if price_field:
-                vals[price_field] = round(random.uniform(5.0, 200.0), 2)
+                vals[price_field] = round(random.uniform(2.5, 180.0), 2)
             if stock_field:
-                vals[stock_field] = random.randint(1, 100)
+                if i in low_stock_indices:
+                    vals[stock_field] = random.randint(1, 4)
+                else:
+                    vals[stock_field] = random.randint(8, 120)
 
             if not vals:
                 self.stdout.write('Modelo Producto no tiene campos compatibles; saltando creación')
@@ -238,6 +316,15 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(f'Warning: could not create pedido: {e}')
                 continue
+
+            estado_field = next((f for f in ['estado', 'status'] if has_field(Pedido, f)), None)
+            if estado_field:
+                estado = weighted_choice(PEDIDO_ESTADOS)
+                setattr(pedido, estado_field, estado)
+                try:
+                    pedido.save(update_fields=[estado_field])
+                except Exception:
+                    pass
             # create detalle items
             if DetallePedido:
                 # detect detalle field names
@@ -312,6 +399,9 @@ class Command(BaseCommand):
                 pedido_fk = f.name
                 break
 
+        if Pedido and pedido_fk:
+            pedidos = list(Pedido.objects.filter(venta__isnull=True))
+
         for i in range(n):
             cliente = random.choice(clientes)
             vdata = {}
@@ -333,6 +423,24 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(f'Warning: could not create venta: {e}')
                 continue
+
+            estado_field = next((f for f in ['estado', 'status'] if has_field(Venta, f)), None)
+            if estado_field:
+                estado = weighted_choice(VENTA_ESTADOS)
+                setattr(venta, estado_field, estado)
+                try:
+                    venta.save(update_fields=[estado_field])
+                except Exception:
+                    pass
+
+            fecha_field = next((f for f in ['fecha_venta', 'fecha', 'created_at'] if has_field(Venta, f)), None)
+            if fecha_field:
+                fecha_venta = random_past_datetime(210)
+                try:
+                    Venta.objects.filter(pk=venta.pk).update(**{fecha_field: fecha_venta})
+                    setattr(venta, fecha_field, fecha_venta)
+                except Exception:
+                    pass
             if DetalleVenta:
                 # detect det_venta_fk, qty and price field names once
                 det_venta_fk = None
@@ -411,7 +519,7 @@ class Command(BaseCommand):
             # estado
             for s in ['estado', 'status']:
                 if has_field(Reclamo, s):
-                    data[s] = 'abierto'
+                    data[s] = weighted_choice(RECLAMO_ESTADOS)
                     break
             fill_required_fields(Reclamo, data, context_instances=context)
             try:

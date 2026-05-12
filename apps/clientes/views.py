@@ -1,15 +1,18 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from apps.permissions import RoleRequiredMixin
+
 from .forms import ClienteForm
 from .models import Cliente
 
 
-class ClienteListView(LoginRequiredMixin, ListView):
+class ClienteListView(RoleRequiredMixin, ListView):
+    allowed_roles = ('gerencia', 'ventas', 'inventario')
     model = Cliente
     template_name = 'clientes/cliente_list.html'
     context_object_name = 'clientes'
@@ -23,11 +26,9 @@ class ClienteListView(LoginRequiredMixin, ListView):
 
         if query:
             queryset = queryset.filter(
-                nombre__icontains=query
-            ) | queryset.filter(
-                nit__icontains=query
-            ) | queryset.filter(
-                correo__icontains=query
+                Q(nombre__icontains=query) |
+                Q(nit__icontains=query) |
+                Q(correo__icontains=query)
             )
 
         if estado in {'activo', 'inactivo', 'suspendido'}:
@@ -36,13 +37,15 @@ class ClienteListView(LoginRequiredMixin, ListView):
         return queryset.distinct().order_by('-fecha_registro')
 
 
-class ClienteDetailView(LoginRequiredMixin, DetailView):
+class ClienteDetailView(RoleRequiredMixin, DetailView):
+    allowed_roles = ('gerencia', 'ventas', 'inventario')
     model = Cliente
     template_name = 'clientes/cliente_detail.html'
     context_object_name = 'cliente'
 
 
-class ClienteCreateView(LoginRequiredMixin, CreateView):
+class ClienteCreateView(RoleRequiredMixin, CreateView):
+    allowed_roles = ('gerencia', 'ventas')
     model = Cliente
     form_class = ClienteForm
     template_name = 'clientes/cliente_form.html'
@@ -53,7 +56,8 @@ class ClienteCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClienteUpdateView(LoginRequiredMixin, UpdateView):
+class ClienteUpdateView(RoleRequiredMixin, UpdateView):
+    allowed_roles = ('gerencia', 'ventas')
     model = Cliente
     form_class = ClienteForm
     template_name = 'clientes/cliente_form.html'
@@ -64,7 +68,9 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ClienteInactivarView(LoginRequiredMixin, View):
+class ClienteInactivarView(RoleRequiredMixin, View):
+    allowed_roles = ('gerencia', 'ventas')
+
     def post(self, request, pk):
         cliente = get_object_or_404(Cliente, pk=pk)
         cliente.estado = 'inactivo'
@@ -73,7 +79,9 @@ class ClienteInactivarView(LoginRequiredMixin, View):
         return redirect('clientes:cliente_list')
 
 
-class ClienteActivarView(LoginRequiredMixin, View):
+class ClienteActivarView(RoleRequiredMixin, View):
+    allowed_roles = ('gerencia', 'ventas')
+
     def post(self, request, pk):
         cliente = get_object_or_404(Cliente, pk=pk)
         cliente.estado = 'activo'

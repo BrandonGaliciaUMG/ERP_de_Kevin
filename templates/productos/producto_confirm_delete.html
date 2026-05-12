@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Eliminar Producto | ERP Ventas{% endblock %}
+{% block title %}Inactivar Producto | ERP Ventas{% endblock %}
 {% block content %}
 <div class="panel-card p-4 text-center">
-    <h3 class="mb-3">Eliminar producto</h3>
-    <p class="text-secondary">¿Deseas eliminar "{{ object.nombre }}"? Esta acción no se puede deshacer.</p>
+    <h3 class="mb-3">Inactivar producto</h3>
+    <p class="text-secondary">¿Deseas inactivar "{{ object.nombre }}"? Se conservará el histórico asociado.</p>
     <form method="post">{% csrf_token %}
         <a class="btn btn-outline-secondary" href="{% url 'productos:producto_list' %}">Cancelar</a>
-        <button class="btn btn-danger">Eliminar</button>
+        <button class="btn btn-danger">Inactivar</button>
     </form>
 </div>
 {% endblock %}

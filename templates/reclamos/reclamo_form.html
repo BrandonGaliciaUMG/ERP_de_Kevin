@@ -22,6 +22,10 @@
                 <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.pedido.id_for_label }}"><i class="bi bi-receipt"></i><span>{{ form.pedido.label }}</span></label>
                 {{ form.pedido }}
             </div>
+            <div class="col-md-6">
+                <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.estado.id_for_label }}"><i class="bi bi-flag"></i><span>{{ form.estado.label }}</span></label>
+                {{ form.estado }}
+            </div>
             <div class="col-12">
                 <label class="form-label d-inline-flex align-items-center gap-2" for="{{ form.descripcion.id_for_label }}"><i class="bi bi-card-text"></i><span>{{ form.descripcion.label }}</span></label>
                 {{ form.descripcion }}

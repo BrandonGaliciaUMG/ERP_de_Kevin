@@ -1,53 +1,23 @@
-# MVP - ERP Ventas
-
-Credenciales provisionales (puede moverlas o eliminarlas después):
-
-- **admin** / `Admin@123`
-- **gerencia** / `Gerencia@123`
-- **ventas** / `Ventas@123`
-- **inventario** / `Inventario@123`
-- **test** / `Test@123`
-
-Cómo ejecutar el comando de seeds que añadimos:
-
-1. Activar el virtualenv del proyecto.
-
-```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-2. Ejecutar el comando `seed` para crear datos de ejemplo (opcionalmente ajustar cantidades):
-
-```powershell
-python manage.py seed --clients 20 --products 30
-```
-
-El comando intenta crear usuarios y datos básicos (clientes, productos). Si tu proyecto tiene modelos con nombres distintos, revisa el fichero [apps/usuarios/management/commands/seed.py](apps/usuarios/management/commands/seed.py) y adáptalo.
-
----
-Fecha: 2026-05-03
 # ERP de Ventas - MVP
 
-## Descripción
-Plataforma de gestión centralizada para ventas, pedidos, clientes y reclamos.
+Plataforma de gestion centralizada para ventas, pedidos, clientes, productos y reclamos.
 
-## Estado del Desarrollo
-Proyecto en construcción - PASO 1 completado.
+## Tecnologias
 
-## Tecnologías
-- Python 3.11
+- Python 3.11+
 - Django 4.2
-- PostgreSQL 15
-- Docker & Docker Compose
 - Bootstrap 5
+- SQLite para desarrollo local
+- PostgreSQL preparado para Docker/produccion
 
 ## Estructura del Proyecto
-```
-erp_ventas/
-├── config/           # Configuración de Django
-├── apps/             # Aplicaciones modulares
-├── templates/        # Templates HTML
-├── static/          # Archivos estáticos
+
+```text
+MVP/
+├── apps/              # Aplicaciones Django
+├── config/            # Configuracion principal de Django
+├── static/            # Archivos estaticos fuente
+├── templates/         # Templates HTML
 ├── docker-compose.yml
 ├── Dockerfile
 ├── manage.py
@@ -55,10 +25,89 @@ erp_ventas/
 └── .env.example
 ```
 
-## Pasos Completados
-✅ PASO 1: Estructura base + archivos iniciales
+## Levantar el Proyecto Localmente
 
-## Próximos Pasos
-⏳ PASO 2: Crear apps Django funcionales
-⏳ PASO 3: Definir modelos de BD
-⏳ PASO 4: Implementar CRUD Cliente
+Desde la carpeta raiz del proyecto:
+
+```powershell
+cd C:\Users\bogalicias\Desktop\MVP
+```
+
+1. Crear un entorno virtual:
+
+```powershell
+python -m venv .venv
+```
+
+2. Activar el entorno virtual:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Si PowerShell bloquea la activacion por politicas de ejecucion, usar:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+3. Instalar dependencias:
+
+```powershell
+pip install -r requirements.txt
+```
+
+4. Aplicar migraciones:
+
+```powershell
+python manage.py migrate
+```
+
+5. Crear datos de ejemplo, opcional:
+
+```powershell
+python manage.py seed --clients 20 --products 30
+```
+
+6. Levantar el servidor:
+
+```powershell
+python manage.py runserver
+```
+
+Abrir la aplicacion en:
+
+```text
+http://127.0.0.1:8000/
+```
+
+## Credenciales Provisionales
+
+Estas credenciales se crean/actualizan al ejecutar el comando `seed`:
+
+- **admin** / `Admin@123`
+- **gerencia** / `Gerencia@123`
+- **ventas** / `Ventas@123`
+- **inventario** / `Inventario@123`
+- **test** / `Test@123`
+
+## Comandos Utiles
+
+Verificar configuracion del proyecto:
+
+```powershell
+python manage.py check
+```
+
+Crear un superusuario manualmente:
+
+```powershell
+python manage.py createsuperuser
+```
+
+Recolectar archivos estaticos para despliegue:
+
+```powershell
+python manage.py collectstatic
+```

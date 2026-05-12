@@ -1,6 +1,9 @@
 from django import forms
-from .models import Venta
+from django.db.models import Q
+
 from apps.pedidos.models import Pedido
+
+from .models import Venta
 
 
 class VentaForm(forms.ModelForm):
@@ -16,5 +19,7 @@ class VentaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # por defecto mostrar pedidos que aún no tienen venta
-        self.fields['pedido'].queryset = Pedido.objects.filter(venta__isnull=True)
+        queryset = Pedido.objects.filter(venta__isnull=True)
+        if self.instance and self.instance.pk:
+            queryset = Pedido.objects.filter(Q(venta__isnull=True) | Q(pk=self.instance.pedido_id))
+        self.fields['pedido'].queryset = queryset.select_related('cliente').order_by('-fecha_pedido')

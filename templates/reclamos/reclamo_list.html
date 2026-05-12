@@ -20,10 +20,14 @@
                 <td>{{ r.cliente.nombre }}</td>
                 <td>{% if r.pedido %}{{ r.pedido.id }}{% else %}-{% endif %}</td>
                 <td><span class="badge text-bg-light border">{{ r.get_estado_display }}</span></td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-dark d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_detail' r.pk %}"><i class="bi bi-eye"></i><span>Ver</span></a>
-                    <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_update' r.pk %}"><i class="bi bi-pencil-square"></i><span>Editar</span></a>
-                    <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_delete' r.pk %}"><i class="bi bi-trash"></i><span>Eliminar</span></a>
+                <td>
+                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <a class="btn btn-sm btn-outline-dark d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_detail' r.pk %}"><i class="bi bi-eye"></i><span>Ver</span></a>
+                        <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_update' r.pk %}"><i class="bi bi-pencil-square"></i><span>Editar</span></a>
+                        {% if r.estado != 'cerrado' %}
+                            <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" href="{% url 'reclamos:reclamo_delete' r.pk %}"><i class="bi bi-check2-square"></i><span>Cerrar</span></a>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% empty %}

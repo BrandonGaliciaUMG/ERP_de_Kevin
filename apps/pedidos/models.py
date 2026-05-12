@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from apps.clientes.models import Cliente
 from apps.productos.models import Producto
@@ -49,7 +51,7 @@ class DetallePedido(models.Model):
     
     def save(self, *args, **kwargs):
         """Calcula el subtotal automaticamente"""
-        self.subtotal = self.cantidad * self.precio_unitario
+        self.subtotal = self.cantidad * Decimal(str(self.precio_unitario))
         super().save(*args, **kwargs)
     
     def __str__(self):

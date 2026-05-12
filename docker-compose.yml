@@ -44,7 +44,7 @@ services:
       DB_NAME: ${POSTGRES_DB:-erp_ventas_db}
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      DB_HOST: ${DB_HOST:-db}
+      DB_HOST: ${DB_HOST:-erp_ventas_db}
       DB_PORT: ${DB_PORT:-5432}
       DB_WAIT_TIMEOUT: ${DB_WAIT_TIMEOUT:-300}
       CSRF_TRUSTED_ORIGINS: ${DOCKER_CSRF_TRUSTED_ORIGINS:-}

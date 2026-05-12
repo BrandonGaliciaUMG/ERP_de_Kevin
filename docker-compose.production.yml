@@ -1,0 +1,172 @@
+version: '3.8'
+
+# Configuración de Docker Compose para PRODUCCIÓN en Dokploy
+# Uso: docker-compose -f docker-compose.production.yml up --build
+# Características:
+# - Gunicorn en lugar de dev server
+# - Reinicio automático
+# - Volúmenes persistentes
+# - Health checks mejorados
+# - Configuración de seguridad
+
+services:
+  # =========================================================================
+  # PostgreSQL Database
+  # =========================================================================
+  db:
+    image: postgres:15-alpine
+    container_name: erp_ventas_db_prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-erp_ventas_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-erp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      TZ: America/Bogota
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      # Volumen opcional para backups
+      # - ./backups:/backups:rw
+    ports:
+      # Solo si necesitas acceso directo desde tu máquina (opcional)
+      # Comentar en producción si no es necesario
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-erp_user} -d ${POSTGRES_DB:-erp_ventas_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - erp_network
+
+  # =========================================================================
+  # Django Web Application (Gunicorn)
+  # =========================================================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp_ventas_web_prod
+    restart: always
+    
+    # Comando de producción con Gunicorn
+    command: >
+      gunicorn 
+      config.wsgi:application 
+      --bind 0.0.0.0:8000 
+      --workers=4 
+      --threads=2 
+      --worker-class=gthread 
+      --worker-tmp-dir=/dev/shm 
+      --max-requests=1000 
+      --max-requests-jitter=100 
+      --timeout=30 
+      --access-logfile - 
+      --error-logfile -
+    
+    # Variables de entorno - REEMPLAZAR CON VALORES REALES
+    environment:
+      # === SEGURIDAD ===
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-change-this-in-production}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      
+      # === BASE DE DATOS ===
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: ${POSTGRES_DB:-erp_ventas_prod}
+      DB_USER: ${POSTGRES_USER:-erp_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      DB_HOST: db  # Nombre del servicio
+      DB_PORT: 5432
+      DB_WAIT_TIMEOUT: ${DB_WAIT_TIMEOUT:-300}
+      
+      # === SEGURIDAD HTTPS ===
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      SECURE_PROXY_SSL_HEADER: ${SECURE_PROXY_SSL_HEADER:-True}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
+      CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-True}
+      SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-True}
+      SECURE_HSTS_SECONDS: ${SECURE_HSTS_SECONDS:-31536000}
+      SECURE_HSTS_INCLUDE_SUBDOMAINS: ${SECURE_HSTS_INCLUDE_SUBDOMAINS:-True}
+      SECURE_HSTS_PRELOAD: ${SECURE_HSTS_PRELOAD:-True}
+      USE_X_FORWARDED_HOST: ${USE_X_FORWARDED_HOST:-True}
+      
+      # === STARTUP ===
+      RUN_COLLECTSTATIC: ${RUN_COLLECTSTATIC:-True}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-True}
+      RUN_SEED: ${RUN_SEED:-False}  # NUNCA True en producción
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      
+      # === TIMEZONE ===
+      TZ: America/Bogota
+      
+      # === LOGGING ===
+      # SENTRY_DSN: ${SENTRY_DSN:-}
+    
+    # Volúmenes persistentes para producción
+    volumes:
+      # Media files (uploads)
+      - media_data:/app/media:rw
+      # Static files (CSS, JS, imágenes)
+      - static_data:/app/staticfiles:rw
+      # NO incluir directorio local (desarrollo solamente)
+      # - .:/app  <-- COMENTADO para producción
+    
+    # Puerto expuesto a la red
+    expose:
+      - "8000"
+    
+    # Depende de que la BD esté lista
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    # Health check para la app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - erp_network
+
+# =========================================================================
+# Volúmenes Persistentes
+# =========================================================================
+volumes:
+  # Base de datos
+  postgres_data_prod:
+    driver: local
+  
+  # Archivos subidos por usuarios
+  media_data:
+    driver: local
+  
+  # Archivos estáticos (CSS, JS, admin)
+  static_data:
+    driver: local
+
+# =========================================================================
+# Red Docker
+# =========================================================================
+networks:
+  erp_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

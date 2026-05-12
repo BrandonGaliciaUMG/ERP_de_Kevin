@@ -1,5 +1,24 @@
 #!/bin/sh
+# Enhanced entrypoint.sh for Django + PostgreSQL in production/development
 set -eu
+
+# Color output for logs
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo "${GREEN}✓${NC} $1"
+}
+
+log_warn() {
+    echo "${YELLOW}⚠${NC} $1"
+}
+
+log_error() {
+    echo "${RED}✗${NC} $1" >&2
+}
 
 is_true() {
     case "${1:-}" in
@@ -8,11 +27,17 @@ is_true() {
     esac
 }
 
+# ============================================================================
+# STEP 1: Wait for Database
+# ============================================================================
+
 if [ "${DB_HOST:-}" ]; then
-    echo "Waiting for database at ${DB_HOST}:${DB_PORT:-5432}..."
+    log_info "Waiting for database at ${DB_HOST}:${DB_PORT:-5432}..."
+    
     python - <<'PY'
 import os
 import socket
+import sys
 import time
 
 host = os.environ.get("DB_HOST")
@@ -24,29 +49,92 @@ last_error = None
 while time.time() < deadline:
     try:
         with socket.create_connection((host, port), timeout=2):
-            print("Database is reachable.")
-            break
+            print("✓ Database is reachable.", flush=True)
+            sys.exit(0)
     except OSError as exc:
         last_error = exc
-        print(f"Database not ready yet: {exc}", flush=True)
+        elapsed = int(time.time() - (deadline - wait_timeout))
+        remaining = int(deadline - time.time())
+        print(f"⏳ Database not ready yet: {exc} (elapsed: {elapsed}s, remaining: {remaining}s)", flush=True)
         time.sleep(3)
-else:
-    raise SystemExit(
-        f"Database {host}:{port} was not reachable in {wait_timeout} seconds. "
-        f"Last error: {last_error}"
-    )
+
+print(f"✗ Database {host}:{port} was not reachable in {wait_timeout} seconds.", flush=True)
+print(f"Last error: {last_error}", flush=True)
+sys.exit(1)
 PY
+    
+    if [ $? -ne 0 ]; then
+        log_error "Database connection failed. Aborting startup."
+        exit 1
+    fi
+else
+    log_warn "DB_HOST not set. Using SQLite (development mode)."
 fi
+
+# ============================================================================
+# STEP 2: Run Migrations
+# ============================================================================
 
 if is_true "${RUN_MIGRATIONS:-True}"; then
-    echo "Applying migrations..."
-    python manage.py migrate --noinput
+    log_info "Applying database migrations..."
+    
+    if python manage.py migrate --noinput; then
+        log_info "Migrations applied successfully"
+    else
+        log_error "Migration failed. Check database connection and migrations."
+        exit 1
+    fi
+else
+    log_warn "Skipping migrations (RUN_MIGRATIONS=False)"
 fi
 
-if is_true "${RUN_COLLECTSTATIC:-False}"; then
-    echo "Collecting static files..."
-    python manage.py collectstatic --noinput
+# ============================================================================
+# STEP 3: Collect Static Files
+# ============================================================================
+
+if is_true "${RUN_COLLECTSTATIC:-True}"; then
+    log_info "Collecting static files..."
+    
+    if python manage.py collectstatic --noinput --clear; then
+        log_info "Static files collected successfully"
+    else
+        log_error "Collectstatic failed. Check file permissions and disk space."
+        exit 1
+    fi
+else
+    log_warn "Skipping collectstatic (RUN_COLLECTSTATIC=False)"
 fi
+
+# ============================================================================
+# STEP 4: Create Default Admin User
+# ============================================================================
+
+log_info "Ensuring admin user exists..."
+
+python manage.py shell << 'CREATE_ADMIN'
+from django.contrib.auth.models import User
+import os
+
+if not User.objects.filter(username='admin').exists():
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'changeme')
+    User.objects.create_superuser('admin', 'admin@example.com', admin_password)
+    print(f"✓ Admin user created (username: admin)")
+else:
+    print("✓ Admin user already exists")
+CREATE_ADMIN
+
+# ============================================================================
+# STEP 5: Final Verification
+# ============================================================================
+
+log_info "Running final health checks..."
+
+python manage.py check --deploy 2>/dev/null || {
+    log_warn "Some deployment checks need attention (review above)"
+}
+
+log_info "All startup tasks completed successfully!"
+log_info "Starting application server..."
 
 if is_true "${RUN_SEED:-False}"; then
     SHOULD_SEED=1

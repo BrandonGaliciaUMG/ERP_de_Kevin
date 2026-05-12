@@ -1,7 +1,0 @@
-Django==4.2.13
-psycopg[binary]>=3.3.0
-python-dotenv==1.0.0
-django-crispy-forms==2.0
-crispy-bootstrap5==0.7
-Pillow>=10.0.0
-gunicorn==21.2.0

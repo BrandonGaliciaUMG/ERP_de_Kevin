@@ -27,27 +27,51 @@ is_true() {
     esac
 }
 
+debug_log() {
+    if is_true "${DEBUG_DB_WAIT:-False}"; then
+        echo "${YELLOW}[db-debug]${NC} $1"
+    fi
+}
+
 # ============================================================================
 # STEP 1: Wait for Database
 # ============================================================================
 
 if [ "${DB_HOST:-}" ]; then
     log_info "Waiting for database at ${DB_HOST}:${DB_PORT:-5432}..."
+    debug_log "DEBUG_DB_WAIT enabled"
+    debug_log "DB_HOST=${DB_HOST} DB_PORT=${DB_PORT:-5432} DB_WAIT_TIMEOUT=${DB_WAIT_TIMEOUT:-180}"
     
     python - <<'PY'
 import os
 import socket
 import sys
 import time
+import traceback
 
 host = os.environ.get("DB_HOST")
 port = int(os.environ.get("DB_PORT", "5432"))
 wait_timeout = int(os.environ.get("DB_WAIT_TIMEOUT", "180"))
+debug = os.environ.get("DEBUG_DB_WAIT", "False").strip().lower() in {"1", "true", "yes", "on"}
 deadline = time.time() + wait_timeout
 last_error = None
 
+def debug_print(message):
+    if debug:
+        print(f"[db-debug] {message}", flush=True)
+
+debug_print(f"Resolving host: {host}")
+try:
+    infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    debug_print(f"getaddrinfo returned {len(infos)} result(s)")
+    for info in infos:
+        debug_print(f"addrinfo={info}")
+except OSError as exc:
+    debug_print(f"DNS resolution failed immediately: {exc}")
+
 while time.time() < deadline:
     try:
+        debug_print(f"Attempting TCP connection to {host}:{port}")
         with socket.create_connection((host, port), timeout=2):
             print("✓ Database is reachable.", flush=True)
             sys.exit(0)
@@ -56,6 +80,9 @@ while time.time() < deadline:
         elapsed = int(time.time() - (deadline - wait_timeout))
         remaining = int(deadline - time.time())
         print(f"⏳ Database not ready yet: {exc} (elapsed: {elapsed}s, remaining: {remaining}s)", flush=True)
+        debug_print(f"Exception type: {type(exc).__name__}")
+        debug_print(f"Exception args: {exc.args}")
+        debug_print(f"Traceback: {traceback.format_exc().strip()}")
         time.sleep(3)
 
 print(f"✗ Database {host}:{port} was not reachable in {wait_timeout} seconds.", flush=True)

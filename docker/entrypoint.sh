@@ -192,4 +192,14 @@ PY
     fi
 fi
 
-exec "$@"
+# ============================================================================
+# STEP 6: Fix Permissions and Switch User
+# ============================================================================
+
+log_info "Fixing directory permissions for django_user..."
+chown -R 1000:1000 /app/staticfiles /app/media 2>/dev/null || {
+    log_warn "Could not chown staticfiles/media (may already be owned by django_user)"
+}
+
+log_info "Switching to django_user and starting server..."
+exec su django_user -c "exec $*"

@@ -18,8 +18,6 @@ RUN chmod +x /app/docker/entrypoint.sh \
     && mkdir -p /app/staticfiles /app/media \
     && chown -R django_user:django_user /app
 
-USER django_user
-
 EXPOSE 8000
 
 ENTRYPOINT ["sh", "/app/docker/entrypoint.sh"]
